@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Séries TV - Biblioteca de Mídia</title>
+    <style>
+        :root {
+            --primary: #0a0a1a;
+            --secondary: #1a1a2e;
+            --accent: #a855f7;
+            --accent-light: #a855f7;
+            --text: #e2e8f0;
+            --text-secondary: #94a3b8;
+            --dev-accent: #10b981;
+            --card-bg: #2f2f2f;
+            --hover-bg: #404040;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: var(--primary);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid var(--accent);
+        }
+        
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .back-btn {
+            background: var(--secondary);
+            color: var(--text);
+            border: none;
+            padding: 10px 15px;
+            cursor: pointer;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .back-btn:hover {
+            background: var(--accent);
+        }
+        
+        .header h1 {
+            color: var(--accent-light);
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            background: var(--accent);
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.3s;
+        }
+        
+        .btn:hover {
+            background: var(--accent-light);
+        }
+        
+        .btn-dev {
+            background: var(--dev-accent);
+        }
+        
+        .btn-dev:hover {
+            background: #34d399;
+        }
+
+        .search-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+        
+        .search-input {
+            flex: 1;
+            padding: 12px 15px;
+            background: var(--secondary);
+            border: 1px solid var(--accent);
+            color: var(--text);
+            font-size: 1rem;
+        }
+        
+        .dev-controls {
+            display: none;
+            justify-content: center;
+            gap: 15px;
+            margin: 20px 0;
+            padding: 15px;
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid var(--dev-accent);
+        }
+        
+        .dev-controls.visible {
+            display: flex;
+        }
+        
+        .series-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        
+        .series-card {
+            background: var(--secondary);
+            overflow: hidden;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+        
+        .series-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .series-poster {
+            width: 100%;
+            height: 200px;
+            background: #2d2d5a;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .series-poster .placeholder {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #2f2f2f, #404040);
+        }
+        
+        .series-poster .placeholder i {
+            font-size: 3rem;
+            color: var(--text-secondary);
+        }
+        
+        .series-info {
+            padding: 15px;
+        }
+        
+        .series-title {
+            font-weight: bold;
+            margin-bottom: 8px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .series-meta {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+        }
+        
+        .edit-icon {
+            color: var(--text-secondary);
+            cursor: pointer;
+            padding: 5px;
+            transition: all 0.3s;
+            display: none;
+        }
+        
+        .edit-icon.visible {
+            display: inline-block;
+        }
+        
+        .edit-icon:hover {
+            color: var(--accent-light);
+            background: rgba(59, 130, 246, 0.1);
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: var(--accent-light);
+            grid-column: 1 / -1;
+        }
+        
+        .no-series {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-secondary);
+            grid-column: 1 / -1;
+        }
+        
+        .search-results {
+            margin-bottom: 20px;
+            color: var(--text-secondary);
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+        }
+        
+        .modal-content {
+            background: var(--secondary);
+            margin: 50px auto;
+            padding: 20px;
+            max-width: 500px;
+            width: 90%;
+        }
+        
+        .modal h3 {
+            margin-bottom: 15px;
+            color: var(--accent-light);
+        }
+        
+        .modal-input {
+            width: 100%;
+            padding: 10px;
+            background: var(--primary);
+            border: 1px solid var(--accent);
+            color: var(--text);
+            margin-bottom: 15px;
+        }
+        
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-left">
+                <a href="index.html" class="back-btn">
+                    <i class="fas fa-arrow-left"></i>
+                    Voltar
+                </a>
+                <h1>Séries</h1>
+            </div>
+        </div>
+
+        <div class="dev-controls" id="devControls">
+            <button class="btn" onclick="exportMetadata()">
+                <i class="fas fa-download"></i> Exportar Metadados
+            </button>
+            <button class="btn" onclick="importMetadata()">
+                <i class="fas fa-upload"></i> Importar Metadados
+            </button>
+        </div>
+
+        <div class="search-container">
+            <input type="text" class="search-input" id="searchInput" placeholder="Pesquisar séries...">
+            <button class="btn" onclick="clearSearch()">
+                <i class="fas fa-times"></i> Limpar
+            </button>
+        </div>
+
+        <div id="searchResults" class="search-results"></div>
+
+        <div class="series-grid" id="seriesGrid">
+            <div class="loading">
+                <i class="fas fa-spinner fa-spin"></i> Carregando séries...
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Series Modal -->
+    <div class="modal" id="editModal">
+        <div class="modal-content">
+            <h3>Editar Título da Série</h3>
+            <input type="text" class="modal-input" id="editSeriesInput" placeholder="Novo título da série">
+            <div class="modal-buttons">
+                <button class="btn" onclick="saveSeriesTitle()">Salvar</button>
+                <button class="btn" onclick="closeEditModal()" style="background: #6b7280;">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentSearchTerm = '';
+        let allSeries = {};
+        let currentEditingSeries = null;
+        let searchTimeout = null;
+
+        const seriesGrid = document.getElementById('seriesGrid');
+        const searchInput = document.getElementById('searchInput');
+        const searchResults = document.getElementById('searchResults');
+        const editModal = document.getElementById('editModal');
+        const editSeriesInput = document.getElementById('editSeriesInput');
+
+        // Load series on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadSeries('');
+        });
+
+        // Real-time search implementation
+        searchInput.addEventListener('input', function() {
+            const searchTerm = this.value.trim();
+            
+            // Clear previous timeout
+            if (searchTimeout) {
+                clearTimeout(searchTimeout);
+            }
+            
+            // Set a new timeout to delay the search
+            searchTimeout = setTimeout(() => {
+                loadSeries(searchTerm);
+            }, 300); // 300ms delay for better performance
+        });
+
+        // Handle Enter key in search
+        searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                // Clear timeout if user presses Enter
+                if (searchTimeout) {
+                    clearTimeout(searchTimeout);
+                }
+                loadSeries(searchInput.value.trim());
+            }
+        });
+
+        function clearSearch() {
+            searchInput.value = '';
+            loadSeries('');
+        }
+
+        function updateEditIconsVisibility() {
+            const editIcons = document.querySelectorAll('.edit-icon');
+        }
+
+        async function loadSeries(searchTerm = '') {
+            showLoading();
+            currentSearchTerm = searchTerm;
+            
+            try {
+                const url = searchTerm ? `/api/series?search=${encodeURIComponent(searchTerm)}` : '/api/series';
+                const response = await fetch(url);
+                if (!response.ok) throw new Error('Failed to load series');
+                
+                const data = await response.json();
+                allSeries = data.series;
+                displaySeries(allSeries);
+                
+                if (searchTerm) {
+                    searchResults.textContent = `Encontradas ${data.totalSeries} séries para "${searchTerm}"`;
+                } else {
+                    searchResults.textContent = `Mostrando todas as ${data.totalSeries} séries`;
+                }
+            } catch (error) {
+                console.error('Error loading series:', error);
+                showError('Erro ao carregar séries. Verifique se o servidor está rodando.');
+            }
+        }
+
+        function displaySeries(series) {
+            seriesGrid.innerHTML = '';
+            const seriesArray = Object.values(series);
+            
+            if (seriesArray.length === 0) {
+                showNoSeries();
+                return;
+            }
+            
+            seriesArray.forEach(seriesItem => {
+                seriesGrid.appendChild(createSeriesCard(seriesItem));
+            });
+            updateEditIconsVisibility();
+        }
+
+        function createSeriesCard(series) {
+            const card = document.createElement('div');
+            card.className = 'series-card';
+            
+            let totalEpisodes = 0;
+            Object.values(series.seasons).forEach(season => {
+                totalEpisodes += season.length;
+            });
+            
+            card.innerHTML = `
+                <div class="series-poster">
+                    <div class="placeholder">
+                        <i class="fas fa-tv"></i>
+                    </div>
+                </div>
+                <div class="series-info">
+                    <div class="series-title">${series.name}</div>
+                    <div class="series-meta">
+                        ${Object.keys(series.seasons).length} Temporada(s) • ${totalEpisodes} Episódio(s)
+                    </div>
+                    <div class="edit-icon" onclick="event.stopPropagation(); openEditModal('${series.name}')">
+                        <i class="fas fa-edit"></i> Editar Título
+                    </div>
+                </div>
+            `;
+            
+            card.addEventListener('click', () => {
+                openSeriesModal(series.name);
+            });
+            
+            return card;
+        }
+
+        function openEditModal(seriesName) {
+            currentEditingSeries = seriesName;
+            editSeriesInput.value = seriesName;
+            editModal.style.display = 'block';
+        }
+
+        function closeEditModal() {
+            editModal.style.display = 'none';
+            currentEditingSeries = null;
+        }
+
+        async function saveSeriesTitle() {
+            if (!currentEditingSeries) return;
+            
+            const newTitle = editSeriesInput.value.trim();
+            if (!newTitle) {
+                alert('Por favor, insira um título válido.');
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/series/${encodeURIComponent(currentEditingSeries)}/title`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ newTitle })
+                });
+
+                if (!response.ok) throw new Error('Failed to update title');
+                
+                alert('Título atualizado com sucesso!');
+                closeEditModal();
+                loadSeries(currentSearchTerm);
+            } catch (error) {
+                console.error('Error updating series title:', error);
+                alert('Erro ao atualizar título da série.');
+            }
+        }
+
+        function openSeriesModal(seriesName) {
+            const series = allSeries[seriesName];
+            if (!series) return;
+            
+            let modalContent = `<h3 style="font-size: 30px; padding-bottom:20px;">${series.name}</h3>`;
+            modalContent += `<p>${Object.keys(series.seasons).length} Temporada(s) • ${series.totalEpisodes} Episódio(s)</p>`;
+            modalContent += `<div style="margin-top: 20px;">`;
+            
+            Object.keys(series.seasons).sort((a, b) => a - b).forEach(seasonNum => {
+                modalContent += `<h4 style="background: var(--accent);padding:10px;font-size: 18px ; padding-left: 20px;">Temporada ${seasonNum}</h4>`;
+                series.seasons[seasonNum].forEach(episode => {
+                    modalContent += `
+                        <div style="padding: 10px; border-bottom: 1px solid #374151; cursor: pointer; background-color: #1f2937;" 
+                             onclick="playEpisode('${episode.path}', '${series.name} - ${episode.customTitle}')">
+                            <strong>Episódio ${episode.episode}:</strong> ${episode.customTitle}
+                        </div>
+                    `;
+                });
+            });
+            
+            modalContent += `</div>`;
+            
+            // Create a simple modal for episode selection
+            const modal = document.createElement('div');
+            modal.style.position = 'fixed';
+            modal.style.top = '0';
+            modal.style.left = '0';
+            modal.style.width = '100%';
+            modal.style.height = '100%';
+            modal.style.background = 'rgba(0,0,0,0.8)';
+            modal.style.zIndex = '1000';
+            modal.style.display = 'flex';
+            modal.style.alignItems = 'center';
+            modal.style.justifyContent = 'center';
+            
+            const modalDiv = document.createElement('div');
+            modalDiv.style.background = 'var(--secondary)';
+            modalDiv.style.padding = '20px';
+            modalDiv.style.borderRadius = '10px';
+            modalDiv.style.maxWidth = '600px';
+            modalDiv.style.maxHeight = '80vh';
+            modalDiv.style.overflow = 'auto';
+            modalDiv.style.width = '90%';
+            modalDiv.innerHTML = modalContent;
+            
+            const closeBtn = document.createElement('button');
+            closeBtn.textContent = 'Fechar';
+            closeBtn.className = 'btn';
+            closeBtn.style.marginTop = '15px';
+            closeBtn.style.background = '#6b7280';
+            closeBtn.onclick = () => document.body.removeChild(modal);
+            
+            modalDiv.appendChild(closeBtn);
+            modal.appendChild(modalDiv);
+            document.body.appendChild(modal);
+            
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    document.body.removeChild(modal);
+                }
+            });
+        }
+
+        function playEpisode(videoPath, title) {
+            const player = document.createElement('div');
+            player.style.position = 'fixed';
+            player.style.top = '0';
+            player.style.left = '0';
+            player.style.width = '100%';
+            player.style.height = '100%';
+            player.style.background = 'rgba(0,0,0,0.9)';
+            player.style.zIndex = '2000';
+            player.style.display = 'flex';
+            player.style.alignItems = 'center';
+            player.style.justifyContent = 'center';
+            
+            const videoDiv = document.createElement('div');
+            videoDiv.style.background = '#000';
+            videoDiv.style.borderRadius = '10px';
+            videoDiv.style.padding = '20px';
+            videoDiv.style.maxWidth = '90%';
+            videoDiv.style.maxHeight = '90%';
+            
+            const video = document.createElement('video');
+            video.src = videoPath;
+            video.controls = true;
+            video.style.width = '100%';
+            video.style.maxHeight = '80vh';
+            video.style.borderRadius = '8px';
+            
+            const closeBtn = document.createElement('button');
+            closeBtn.textContent = 'Fechar';
+            closeBtn.className = 'btn';
+            closeBtn.style.marginTop = '15px';
+            closeBtn.style.background = '#ef4444';
+            closeBtn.onclick = () => document.body.removeChild(player);
+            
+            videoDiv.appendChild(video);
+            videoDiv.appendChild(closeBtn);
+            player.appendChild(videoDiv);
+            document.body.appendChild(player);
+            
+            player.addEventListener('click', (e) => {
+                if (e.target === player) {
+                    document.body.removeChild(player);
+                }
+            });
+        }
+
+        function showLoading() {
+            seriesGrid.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-spin"></i> Carregando séries...</div>';
+        }
+
+        function showNoSeries() {
+            const message = currentSearchTerm ? 
+                `Nenhuma série encontrada para "${currentSearchTerm}"` : 
+                'Nenhuma série encontrada. Adicione séries na pasta videos/series/.';
+            seriesGrid.innerHTML = `<div class="no-series">${message}</div>`;
+        }
+
+        function showError(message) {
+            seriesGrid.innerHTML = `<div class="no-series">${message}</div>`;
+        }
+
+        async function exportMetadata() {
+            try {
+                const response = await fetch('/api/metadata/export');
+                const blob = await response.blob();
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'metadata.csv';
+                a.click();
+                URL.revokeObjectURL(url);
+            } catch (error) {
+                alert('Erro ao exportar metadados.');
+            }
+        }
+
+        function importMetadata() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.csv';
+            input.onchange = async (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                
+                try {
+                    const content = await file.text();
+                    const response = await fetch('/api/metadata/import', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'text/csv' },
+                        body: content
+                    });
+                    
+                    if (response.ok) {
+                        alert('Metadados importados com sucesso!');
+                        loadSeries(currentSearchTerm);
+                    } else {
+                        alert('Erro ao importar metadados.');
+                    }
+                } catch (error) {
+                    alert('Erro ao importar metadados.');
+                }
+            };
+            input.click();
+        }
+
+        // Close modal when clicking outside
+        editModal.addEventListener('click', (e) => {
+            if (e.target === editModal) closeEditModal();
+        });
+    </script>
+</body>
+</html>

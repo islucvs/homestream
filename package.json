@@ -1,0 +1,14 @@
+{
+  "name": "video-player",
+  "version": "1.0.0",
+  "description": "Dynamic video player with CSV metadata",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "csv-parser": "^3.2.0",
+    "csv-writer": "^1.6.0",
+    "express": "^4.21.2"
+  }
+}

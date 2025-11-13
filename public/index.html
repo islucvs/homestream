@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reprodutor de vídeo local</title>
+    <style>
+        :root {
+            --primary: #0a0a1a;
+            --secondary: #1a1a2e;
+            --accent: #1e40af;
+            --accent-light: #3b82f6;
+            --text: #e2e8f0;
+            --text-secondary: #94a3b8;
+            --movie-color: #3b82f6;
+            --series-color: #a855f7;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: var(--primary);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .landing-container {
+            text-align: center;
+            max-width: 800px;
+            padding: 40px 20px;
+        }
+        
+        .logo {
+            margin-bottom: 40px;
+        }
+        
+        .logo h1 {
+            font-size: 3rem;
+            color: var(--accent-light);
+            margin-bottom: 10px;
+        }
+        
+        .logo p {
+            color: var(--text-secondary);
+            font-size: 1.2rem;
+        }
+        
+        .selection-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 50px;
+        }
+        
+        .selection-card {
+            background: var(--secondary);
+            border-radius: 15px;
+            padding: 40px 30px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            text-decoration: none;
+            color: inherit;
+        }
+        
+        .selection-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--accent-light);
+        }
+        
+        .selection-card.movies:hover {
+            border-color: var(--movie-color);
+        }
+        
+        .selection-card.series:hover {
+            border-color: var(--series-color);
+        }
+        
+        .card-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+        }
+        
+        .movies .card-icon {
+            color: var(--movie-color);
+        }
+        
+        .series .card-icon {
+            color: var(--series-color);
+        }
+        
+        .card-title {
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+        
+        .card-description {
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+        
+        .stats {
+            margin-top: 20px;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="landing-container">
+        <div class="logo">
+            <h1>Homestream</h1>
+            <p>Sua plataforma de streaming local</p>
+        </div>
+        
+        <div class="selection-cards">
+            <a href="movies.html" class="selection-card movies">
+                <div class="card-icon">
+                    <i class="fas fa-film"></i>
+                </div>
+                <h2 class="card-title">Filmes</h2>
+                <p class="card-description">Navegue pela sua coleção de filmes com streaming de alta qualidade e metadados organizados.</p>
+                <div class="stats" id="moviesStats">Carregando...</div>
+            </a>
+            
+            <a href="series.html" class="selection-card series">
+                <div class="card-icon">
+                    <i class="fas fa-tv"></i>
+                </div>
+                <h2 class="card-title">Séries</h2>
+                <p class="card-description">Assista aos seus programas de TV favoritos com temporadas e episódios organizados.</p>
+                <div class="stats" id="seriesStats">Carregando...</div>
+            </a>
+        </div>
+    </div>
+
+    <script>
+        // Load stats on page load
+        async function loadStats() {
+            try {
+                // Load movies count
+                const moviesResponse = await fetch('/api/movies');
+                if (moviesResponse.ok) {
+                    const moviesData = await moviesResponse.json();
+                    document.getElementById('moviesStats').textContent = 
+                        `${moviesData.total} movies available`;
+                }
+                
+                // Load series count
+                const seriesResponse = await fetch('/api/series');
+                if (seriesResponse.ok) {
+                    const seriesData = await seriesResponse.json();
+                    document.getElementById('seriesStats').textContent = 
+                        `${seriesData.totalSeries} series available`;
+                }
+            } catch (error) {
+                console.error('Error loading stats:', error);
+                document.getElementById('moviesStats').textContent = 'Movies available';
+                document.getElementById('seriesStats').textContent = 'Series available';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', loadStats);
+    </script>
+</body>
+</html>
