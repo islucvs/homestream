@@ -28,6 +28,7 @@ And then run
 The application is set to run on port 80, you can change it on the `server.js` file. 
 
 ## File Structure
+```
 `data`
     ├── metadata.csv
     └── MOVIE_TITLES_METADATA.txt
@@ -54,3 +55,4 @@ server.js
             │   └── S01E01 (EXAMPLE).txt
             └── temporada 2
                 └── S01E02 (EXAMPLE).txt
+```
