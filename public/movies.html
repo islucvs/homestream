@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Filme - Biblioteca</title>
+    <title>Movies - Library</title>
     <style>
         :root {
             --primary: #0a0a1a;
@@ -260,7 +260,7 @@
                     <i class="fas fa-arrow-left"></i>
                     Menu
                 </a>
-                <h1>Filmes</h1>
+                <h1>Movies</h1>
             </div>
             <button class="btn btn-dev" id="devModeBtn" onclick="toggleDevMode()">
                 <i class="fas fa-code"></i> Dev Mode
@@ -270,10 +270,10 @@
         <div class="search-container">
             <input type="text" class="search-input" id="searchInput" placeholder="Pesquisar...">
             <button class="btn" onclick="searchMovies()">
-                <i class="fas fa-search"></i> Pesquisar
+                <i class="fas fa-search"></i> Search
             </button>
             <button class="btn" onclick="clearSearch()">
-                <i class="fas fa-times"></i> Limpar
+                <i class="fas fa-times"></i> Clean
             </button>
         </div>
         
@@ -290,7 +290,7 @@
         
         <div class="movies-grid" id="moviesGrid">
             <div class="loading">
-                <i class="fas fa-spinner fa-spin"></i> Carregando...
+                <i class="fas fa-spinner fa-spin"></i> Loading...
             </div>
         </div>
     </div>
@@ -379,9 +379,9 @@
                 
                 // Update search results text
                 if (searchTerm) {
-                    searchResults.textContent = `Encontramos ${data.total} filmes correspondentes a "${searchTerm}"`;
+                    searchResults.textContent = `Found ${data.total} movies related to "${searchTerm}"`;
                 } else {
-                    searchResults.textContent = `Mostrando todos os ${data.total} filmes`;
+                    searchResults.textContent = `Showing all ${data.total} movies`;
                 }
             } catch (error) {
                 console.error('Error loading movies:', error);
